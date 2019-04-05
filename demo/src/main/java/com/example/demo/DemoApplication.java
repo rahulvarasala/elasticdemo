@@ -34,7 +34,7 @@ public class DemoApplication {
 		//This part is used to get bin log data from mysql master
 		
 		BinaryLogClient client =
-	              new BinaryLogClient("localhost", 3306, "<MYSQL_USER>", "<MYSQL_PASSWROD>");
+				new BinaryLogClient("localhost", 3306, "root", "nandu1234");
 
 	            client.registerEventListener(event -> {
 	                System.out.println(event);
