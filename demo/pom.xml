@@ -29,11 +29,11 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		<dependency>
+		<!--<dependency>
 		    <groupId>org.apache.lucene</groupId>
 		    <artifactId>lucene-core</artifactId>
 		    <version>6.1.0</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
                 <groupId>com.github.shyiko</groupId>
                 <artifactId>mysql-binlog-connector-java</artifactId>
@@ -45,7 +45,7 @@
                 <artifactId>pusher-http-java</artifactId>
                 <version>1.0.0</version>
             </dependency>
-	<dependency>
+	<!--<dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-queries</artifactId>
     <version>6.1.0</version>
@@ -54,7 +54,7 @@
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>
     <version>6.1.0</version>
-</dependency>
+</dependency>-->
 <!-- 		<dependency>
     <groupId>org.apache.lucene</groupId>
     <artifactId>lucene-analyzers-common</artifactId>

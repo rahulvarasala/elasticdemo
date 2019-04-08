@@ -3,14 +3,14 @@ package com.example.elastic;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.core.ElasticsearchOperations;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.repository.config.EnableElasticsearchRepositories;
-
 import java.net.InetAddress;
 
 //http://docs.spring.io/spring-boot/docs/current/reference/html/boot-features-nosql.html#boot-features-connecting-to-elasticsearch-spring-data
@@ -19,7 +19,7 @@ import java.net.InetAddress;
 //http://geekabyte.blogspot.my/2015/08/embedding-elasticsearch-in-spring.html
 //https://github.com/spring-projects/spring-data-elasticsearch/wiki/Spring-Data-Elasticsearch---Spring-Boot---version-matrix
 @Configuration
-@EnableElasticsearchRepositories(basePackages = "com.mkyong.book.repository")
+//@EnableElasticsearchRepositories(basePackages = "com.mkyong.book.repository")
 public class EsConfig {
 
     @Value("${elasticsearch.host}")
@@ -27,30 +27,40 @@ public class EsConfig {
 
     @Value("${elasticsearch.port}")
     private int EsPort;
-
-    @Value("${elasticsearch.clustername}")
-    private String EsClusterName;
+//
+//    @Value("${elasticsearch.clustername}")
+//    private String EsClusterName;
 
     @Bean
     public Client client() throws Exception {
 
-        Settings esSettings = Settings.settingsBuilder()
-                .put("cluster.name", EsClusterName)
-                .build();
+//        Settings esSettings = Settings.settingsBuilder()
+//                .put("cluster.name", EsClusterName)
+//                .build();
 
         //https://www.elastic.co/guide/en/elasticsearch/guide/current/_transport_client_versus_node_client.html
-        return TransportClient.builder()
+        /*return TransportClient.builder()
                 .settings(esSettings)
                 .build()
-                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(EsHost), EsPort));
+                .addTransportAddress(new InetSocketTransportAddress(InetAddress.getByName(EsHost), EsPort));*/
+        System.out.println("Creating elastcsearch client");
+        TransportClient client = new PreBuiltTransportClient(Settings.EMPTY)
+                //.addTransportAddress(new TransportAddress(InetAddress.getByName("host1"), 9300))
+                .addTransportAddress(new TransportAddress(InetAddress.getByName(EsHost), EsPort));
+        System.out.println("Client created successfully"+client);
+        return client;
+
+// on shutdown
+
+        //client.close();
 
 
     }
 
-    @Bean
+    /*@Bean
     public ElasticsearchOperations elasticsearchTemplate() throws Exception {
         return new ElasticsearchTemplate(client());
-    }
+    }*/
 
     //Embedded Elasticsearch Server
     /*@Bean

@@ -1,21 +1,17 @@
 package com.example.demo;
 
+import org.apache.lucene.document.LongPoint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import com.github.shyiko.mysql.binlog.BinaryLogClient;
-
 import java.io.IOException;
-
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
-import org.apache.lucene.document.LegacyLongField;
 import org.apache.lucene.document.StringField;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
 import org.apache.lucene.index.Term;
-import org.apache.lucene.index.TrackingIndexWriter;
 import org.apache.lucene.search.ControlledRealTimeReopenThread;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.Query;
@@ -24,8 +20,10 @@ import org.apache.lucene.search.SearcherManager;
 import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.RAMDirectory;
+import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
+@ComponentScan("com.example.elastic")
 public class DemoApplication {
 
 	public static void main(String[] args) throws InterruptedException, IOException {
@@ -33,13 +31,13 @@ public class DemoApplication {
 		
 		//This part is used to get bin log data from mysql master
 		
-		BinaryLogClient client =
+		/*BinaryLogClient binLogClient =
 				new BinaryLogClient("localhost", 3306, "root", "nandu1234");
 
-	            client.registerEventListener(event -> {
+		binLogClient.registerEventListener(event -> {
 	                System.out.println(event);
 	            });
-	            client.connect();
+		binLogClient.connect();*/
 
 		
 		        //=========================================================
@@ -47,21 +45,21 @@ public class DemoApplication {
 		        //=========================================================
 		        StandardAnalyzer analyzer = new StandardAnalyzer();
 		        RAMDirectory index = new RAMDirectory();
-
+		System.out.println("Creating Indexwriter");
 		        IndexWriterConfig config = new IndexWriterConfig(analyzer);
 		        final IndexWriter indexWriter = new IndexWriter(index, config);
 
 		        //=========================================================
 		        // This bit is specific to NRT
 		        //=========================================================
-		        TrackingIndexWriter trackingIndexWriter = new TrackingIndexWriter(indexWriter);
+		        //TrackingIndexWriter trackingIndexWriter = new TrackingIndexWriter(indexWriter);
 		        final ReferenceManager<IndexSearcher> searcherManager = new SearcherManager(indexWriter, null);
-
+		System.out.println("Creating NRT Thread");
 		        //=========================================================
 		        // This thread handles the actual reader reopening.
 		        //=========================================================
 		        ControlledRealTimeReopenThread<IndexSearcher> nrtReopenThread = new ControlledRealTimeReopenThread<IndexSearcher>(
-		            trackingIndexWriter, searcherManager, 1.0, 0.1);
+		            indexWriter, searcherManager, 1.0, 0.1);
 		        nrtReopenThread.setName("NRT Reopen Thread");
 		        nrtReopenThread.setPriority(Math.min(Thread.currentThread().getPriority() + 2, Thread.MAX_PRIORITY));
 		        nrtReopenThread.setDaemon(true);
@@ -76,7 +74,7 @@ public class DemoApplication {
 		                try {
 		                    for (int i = 0; i < 100000; ++i) {
 		                        Document doc = new Document();
-		                        doc.add(new LegacyLongField("time", System.currentTimeMillis(), Field.Store.YES));
+		                        doc.add(new LongPoint("time", System.currentTimeMillis()));
 		                        doc.add(new StringField("counter", ""+i, Field.Store.YES));
 		                        indexWriter.addDocument(doc);
 		                        searcherManager.maybeRefresh();
